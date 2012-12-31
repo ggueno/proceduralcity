@@ -33,7 +33,7 @@ CityApplication::CityApplication() :
     //m_scene.camera.setPerspectiveProjection(-size, size, -size, size, near, far);
     //m_scene.camera.setPosition(vec3(0, 10, -100));
 
-    MoveableCamera * camera = initCamera(.06, glm::vec3(0., 0., 0.));
+    CityCamera * camera = initCamera(.06, glm::vec3(0., 0., 0.));
     loadShaders();
     loadTextures();
     //draw beast
@@ -116,11 +116,11 @@ void CityApplication::loadFrameBuffer(){
     }
 }
 
-MoveableCamera * CityApplication::initCamera(const float size, glm::vec3 position) {
-    m_scene.camera = new MoveableCamera();
+CityCamera * CityApplication::initCamera(const float size, glm::vec3 position) {
+    m_scene.camera = new CityCamera();
     m_scene.camera->setPerspectiveProjection(-size, size, -size, size, .1, 500);
     m_scene.camera->setPosition(position);
-    return (MoveableCamera*)m_scene.camera;
+    return (CityCamera*)m_scene.camera;
 }
 
 
@@ -132,7 +132,7 @@ void CityApplication::mouseMotionEvent() {
 
     if(!m_bShowMouse)
         // Mouse Camera Movement
-        ((MoveableCamera*)m_scene.camera)->setMouseMovement(m_mouseXPos - _exMouseXPos, m_mouseYPos - _exMouseYPos);
+        ((CityCamera*)m_scene.camera)->setMouseMovement(m_mouseXPos - _exMouseXPos, m_mouseYPos - _exMouseYPos);
 }
 
 void CityApplication::mouseButtonEvent() {
@@ -142,16 +142,16 @@ void CityApplication::mouseButtonEvent() {
 
 void CityApplication::keyEvent() {
     // Get keboard motion + movement setting
-    if(glfwGetKey('Z') == GLFW_PRESS) ((MoveableCamera*)m_scene.camera)->setKeyMovement(FORWARD);
-    if(glfwGetKey('Q') == GLFW_PRESS) ((MoveableCamera*)m_scene.camera)->setKeyMovement(LEFT);
-    if(glfwGetKey('S') == GLFW_PRESS) ((MoveableCamera*)m_scene.camera)->setKeyMovement(BACKWARD);
-    if(glfwGetKey('D') == GLFW_PRESS) ((MoveableCamera*)m_scene.camera)->setKeyMovement(RIGHT);
+    if(glfwGetKey('Z') == GLFW_PRESS) ((CityCamera*)m_scene.camera)->setKeyMovement(FORWARD);
+    if(glfwGetKey('Q') == GLFW_PRESS) ((CityCamera*)m_scene.camera)->setKeyMovement(LEFT);
+    if(glfwGetKey('S') == GLFW_PRESS) ((CityCamera*)m_scene.camera)->setKeyMovement(BACKWARD);
+    if(glfwGetKey('D') == GLFW_PRESS) ((CityCamera*)m_scene.camera)->setKeyMovement(RIGHT);
     if(glfwGetKey('H') == GLFW_PRESS) hideCursor('H');
 }
 
 
 void CityApplication::animate() {
-    ((MoveableCamera*)m_scene.camera)->move();
+    ((CityCamera*)m_scene.camera)->move();
 }
 
 

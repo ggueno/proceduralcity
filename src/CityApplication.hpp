@@ -8,7 +8,7 @@
 #include "stein/FramebufferGL.hpp"
 #include "stein/Color.hpp"
 #include "City/Grid.hpp"
-#include "MoveableCamera.hpp"
+#include "CityCamera.hpp"
 
 class CityApplication : public stein::Application {
 public:
@@ -17,7 +17,7 @@ public:
     void mouseMotionEvent();
 	void mouseButtonEvent();
     void keyEvent();
-    MoveableCamera* initCamera(const float size, glm::vec3 position);
+    CityCamera* initCamera(const float size, glm::vec3 position);
     void loadShaders();
 	void loadTextures();
     void loadFrameBuffer();
