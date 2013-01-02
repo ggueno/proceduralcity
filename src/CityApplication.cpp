@@ -42,7 +42,7 @@ CityApplication::CityApplication() :
     //init finalScreen
     Object &quadObject = m_scene.createObject(GL_TRIANGLES);
     buildSquare(quadObject, 1);
-    m_screen = m_scene.addObjectToDraw(quadObject.id);
+    //m_screen = m_scene.addObjectToDraw(quadObject.id);
 
     // On charge une grille
     Grid * g = new Grid(vec3(100.0,-1.0,-100.0), 200.0, 200.0,6,5.0,1.0);
@@ -183,7 +183,7 @@ void CityApplication::renderFrame() {
 
   //LACCUM
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
-  glViewport( 0, 0, m_width, m_height  );
+  glViewport( 0, 0, m_width, m_height );
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   // // Bind laccum shader
@@ -220,7 +220,7 @@ void CityApplication::renderFrame() {
   glm::mat4 projectionLightBias = projectionLight * MAT4F_M1_P1_TO_P0_P1;
 
   // // Upload uniforms
-  glm::mat4 projMat = glm::ortho(-0.5f, 0.5f, -0.5f, 0.5f, -1.0f, 1.0f );
+  glm::mat4 projMat = glm::ortho(-400.0f, 400.0f, -400.0f, 400.0f, -1.0f, 1.0f );
   glUniformMatrix4fv(glGetUniformLocation(shaders[LACCUM], "Projection"), 1, 0, glm::value_ptr(projMat));
   glUniform1i(glGetUniformLocation(shaders[LACCUM], "Material"), 0);
   glUniform1i(glGetUniformLocation(shaders[LACCUM], "Normal"), 1);
