@@ -7,13 +7,12 @@
 
 class Lot{
 public:
-    Lot(glm::vec3 topLeft, glm::vec3 bottomLeft, glm::vec3 bottomRight, glm::vec3 topRight, float heightMax, float heightMin):
+    Lot(glm::vec3 topLeft, glm::vec3 bottomLeft, glm::vec3 bottomRight, glm::vec3 topRight, float height):
         m_topLeft(topLeft),
         m_bottomLeft(bottomLeft),
         m_bottomRight(bottomRight),
         m_topRight(topRight),
-        m_buildingHeightMax(heightMax),
-        m_buildingHeightMin(heightMin),
+        m_buildingHeight(height),
         m_full(false) {
             // if(m_topLeft.x > m_topRight.x){
             //     std::swap(m_topLeft,m_topRight);
@@ -38,9 +37,11 @@ public:
     void setTopRight(glm::vec3 topR){ m_topRight = topR; }
     void setBottomLeft(glm::vec3 bottomL){ m_bottomLeft = bottomL; }
     void setBottomRight(glm::vec3 bottomR){ m_bottomRight = bottomR; }
+    void setBuildingHeight(float height){ m_buildingHeight = height;}
 
     float getWidth(){ return fabs(m_topRight.x - m_topLeft.x); };
     float getHeight(){ return fabs(m_bottomRight.z - m_topRight.z); };
+    float getBuildingHeight(){ return m_buildingHeight; }
 
     bool isFull(){ return m_full; }
 
@@ -54,8 +55,7 @@ public:
 
 protected:
     glm::vec3 m_topLeft, m_topRight, m_bottomRight, m_bottomLeft;
-    float m_buildingHeightMax;
-    float m_buildingHeightMin;
+    float m_buildingHeight;
     bool m_full;
 };
 

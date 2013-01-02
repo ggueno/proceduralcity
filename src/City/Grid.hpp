@@ -35,7 +35,7 @@ protected:
 
     std::vector<glm::vec3> listNodes;
     std::vector<Parcel * > listParcels;
-    float width, height;
+    float m_width, m_height;
 };
 
 #endif

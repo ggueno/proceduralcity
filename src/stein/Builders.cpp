@@ -181,7 +181,7 @@ bool buildObjectGeometryFromOBJ(Object &object, const char* fileName, bool smoot
 }
 
 
-void buildSphere(Object &object, const float r,std::size_t discLat, std::size_t discLong){
+void buildSphere(Object &object, const float r,std::size_t discLat, std::size_t discLong, int normalSens){
     MeshBuilder builder;
 
     GLfloat rcpLat = 1.f / discLat, rcpLong = 1.f / discLong;
@@ -201,9 +201,9 @@ void buildSphere(Object &object, const float r,std::size_t discLat, std::size_t 
                             );
 
             builder.addNormal(
-                sin(i * dPhi) * cosTheta,
-                sinTheta,
-                cos(i * dPhi) * cosTheta);
+                normalSens * sin(i * dPhi) * cosTheta,
+                normalSens * sinTheta,
+                 normalSens * cos(i * dPhi) * cosTheta);
 
             builder.addUV(i * rcpLat, 1.f - j * rcpLong);
 

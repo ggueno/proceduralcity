@@ -109,6 +109,7 @@ void main(void)
 
 	vec3 cspotlight1 = spotLight(LightColor, LightIntensity, LightDirection, LightPosition, n, position, diffuse, spec, CameraPosition );
 
+	
 	if (wlightSpacePosition.w > 0.0  && lightSpacePosition.x > 0.0 && lightSpacePosition.x < 1.0 && lightSpacePosition.y > 0.0 && lightSpacePosition.y < 1.0 )
 	{
 		
@@ -122,14 +123,15 @@ void main(void)
 			    visibility-=visibilityOffset;
 			}
 		}
-		Color = vec4(cspotlight1 * visibility, 1.0);
+		//Color = vec4(cspotlight1 * visibility, 1.0);
 
 	}
 	else
 	{
-		Color = vec4(cspotlight1, 1.0);
-	}
-	/*
+		//Color = vec4(cspotlight1, 1.0);
+	} 
+	
+	/* 
 	float shadowDepth = texture(Shadow, lightSpacePosition.xy).r;
 	Color = vec4(lightSpacePosition.z - shadowDepth , 0.0, 0.0, 1.0);
 
@@ -138,14 +140,15 @@ void main(void)
 		Color = vec4(0.0, 0.0, 0.0, 1.0);
 	else
 		Color = vec4(cspotlight1, 1.0);
-*/
+
+		*/
 	//Color = vec4(lightSpacePosition.z, 0.0, 0.0, 1.0);
 	//Color = vec4(lightSpacePosition.xy, -lightSpacePosition.z, 1.0);
 
 	//Color = vec4(shadowDepth , 0.0, 0.0, 1.0);
 
 
-	//Color = vec4(cspotlight1, 1.0);
+	Color = vec4(cspotlight1, 1.0);
 	//Color = vec4(texture(Shadow, uv).z, 0.0 , 0.0, 1.0);
 
 	//Color = vec4(shadowDepth, 0.0, 0.0, 1.0);

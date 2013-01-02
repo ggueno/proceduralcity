@@ -95,7 +95,7 @@ GLuint loadTexture(const char * fileName, int textureUnit) {
             break;
         case 2 : 
             glActiveTexture(GL_TEXTURE2);
-            data = stbi_load(fileName, &w, &h, &comp, 1);
+            data = stbi_load(fileName, &w, &h, &comp, 3);
             break;
         default:
             glActiveTexture(GL_TEXTURE0);
@@ -117,9 +117,6 @@ GLuint loadTexture(const char * fileName, int textureUnit) {
     // Specifies which image will be used for this texture objet
     switch(textureUnit){
         case 1 : 
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, w, h, 0, GL_RED, GL_UNSIGNED_BYTE, data);
-            break;
-        case 2 : 
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, w, h, 0, GL_RED, GL_UNSIGNED_BYTE, data);
             break;
         default:
@@ -272,7 +269,7 @@ void setFilledDataInShader(GLuint shaderID, GLboolean positions, GLboolean norma
 void setTextureUnitsInShader(GLuint shaderID) {
     glUniform1i(glGetUniformLocation(shaderID, "textureUnitDiffuse"), 0);
     glUniform1i(glGetUniformLocation(shaderID, "textureUnitSpecular"), 1);
-    glUniform1i(glGetUniformLocation(shaderID, "textureUnitBump"), 2);
+    glUniform1i(glGetUniformLocation(shaderID, "textureUnitNormal"), 2);
 }
 
 

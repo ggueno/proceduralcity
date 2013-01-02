@@ -17,7 +17,7 @@ out vec3 position;
 
 void main(void)
 {	
-	uv = vertexTexCoord;
+	uv = vertexUv;
 	normal = vec3(model * vec4(vertexNormal, 1.0));; 
 	position = vec3(model * vec4(vertexPosition, 1.0));
 	//position.y += (gl_InstanceID * 1.5); 

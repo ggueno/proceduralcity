@@ -9,7 +9,7 @@ enum shaderType {
 };
 
 enum textureType {
-    BATIMENT
+    BATIMENT, SKYDOME
 };
 
 enum  frameBufferType {
@@ -37,6 +37,7 @@ CityApplication::CityApplication() :
     loadShaders();
     loadTextures();
     loadFrameBuffer();
+    //loadSkyDome();
     //draw beast
 
     //init finalScreen
@@ -45,7 +46,7 @@ CityApplication::CityApplication() :
     m_screen = m_scene.addObjectToDraw(quadObject.id);
 
     // On charge une grille
-    Grid * g = new Grid(vec3(100.0,-1.0,-100.0), 200.0, 200.0,6,5.0,1.0);
+    Grid * g = new Grid(vec3(-100.0,-1.0,-100.0), 200.0, 200.0,3,5.0,5.0);
 
     // Pour chaque parcels lot de la grille on ajoute un immeuble de la taille (hauteur, largeur) convenus
     // std::vector<Building *> buildings;
@@ -65,7 +66,7 @@ CityApplication::CityApplication() :
         vec3 p = l->getCenter();
         float lot_width = l->getWidth();
         float lot_length = l->getHeight();
-        float lot_height = 10.0;
+        float lot_height = l->getBuildingHeight();
 
         element = m_scene.addObjectToDraw(building.id);
         //m_scene.setDrawnObjectColor(element, Color(1.0f, 0.0f, 0.0f));
@@ -87,9 +88,21 @@ CityApplication::CityApplication() :
 
 }
 
+void CityApplication::loadSkyDome(){
+  Object &skydome = m_scene.createObject(GL_TRIANGLES);
+  buildSphere(skydome, 1.0,160,160, -1);
+  GLuint element = m_scene.addObjectToDraw(skydome.id);
+  m_scene.setDrawnObjectTextureID0(element, textures[SKYDOME][0]);
+  //m_scene.setDrawnObjectTextureID1(element, textures[SKYDOME][1]);
+  //m_scene.setDrawnObjectTextureID2(element, textures[SKYDOME][2]);
+  m_scene.setDrawnObjectModel(element, scalee(vec3(200.0, 200.0, 200.0)));
+
+
+}
+
 // Load shaders
 void CityApplication::loadShaders() {
-    shaders[COLOR] = loadProgram("shaders/colorShader.glsl");
+    //shaders[COLOR] = loadProgram("shaders/colorShader.glsl");
     shaders[GBUFFER] = loadProgram("shaders/3_gbuffer.glsl");
     shaders[LACCUM] = loadProgram("shaders/3_laccum_spot.glsl");
     shaders[SHADDOW] = loadProgram("shaders/3_shadowgen.glsl");
@@ -99,9 +112,13 @@ void CityApplication::loadShaders() {
 }
 
 void CityApplication::loadTextures(){
-    textures[BATIMENT][0] = loadTexture("textures/spnza_bricks_a_diff.tga", 0);
+    textures[BATIMENT][0] = loadTexture("textures/acera.tga", 0);
     textures[BATIMENT][1] = loadTexture("textures/spnza_bricks_a_spec.tga", 1);
-    textures[BATIMENT][2] = loadTexture("textures/spnza_bricks_a_bump.png", 2);
+    textures[BATIMENT][2] = loadTexture("textures/normalmap.tga", 2);
+
+
+    //SKYDOME
+    textures[SKYDOME][0] = loadTexture("textures/skybox.jpg", 0);
 }
 
 void CityApplication::loadFrameBuffer(){
@@ -164,7 +181,7 @@ void CityApplication::animate() {
 void CityApplication::renderFrame() {
   //INIT
     // // Compute light positions
-  glm::vec3 lightPosition(5.0, 5.0, 5.0);
+  glm::vec3 lightPosition(2.0, 2.0, 2.0);
   //float lightPosition[3] = { sin(t) * 10.0, 5.0, cos(t) * 10.0};
   glm::vec3 lightTarget(0.0, 0.0, 0.0);
   glm::vec3 lightDirection;

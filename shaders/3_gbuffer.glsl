@@ -76,6 +76,7 @@ in vec4 vEyeSpacePos;
 
 uniform sampler2D textureUnitDiffuse;
 uniform sampler2D textureUnitSpecular;
+uniform sampler2D textureUnitNormal;
 
 out vec4  Color;
 out vec4  Normal;
@@ -111,6 +112,10 @@ void main(void)
 	vec3 diffuse = texture(textureUnitDiffuse, uv).rgb;
     //Color = vec4(uv.s, uv.t, 0.0, 1.0);
 	float spec = texture(textureUnitSpecular, uv).r;
+  vec3 nn = normalize(texture(textureUnitNormal, uv).rgb * 2.0 - 1.0);  
+  vec3 light_pos = normalize(vec3(10.0, 10.0, 10.5));  
+  
+  float normal_map = max(dot(nn, light_pos), 0.0);
 
     float fFogCoord = abs(vEyeSpacePos.z/vEyeSpacePos.w);
 
@@ -122,15 +127,15 @@ void main(void)
     fparams.iEquation = 2;
 
     //vec4 color_light = vec4(1.0-uv.x*0.5, 1.0-uv.y*0.5, 1.0, spec);
-    vec4 color_light = vec4(diffuse, 1.0);
-    Color = color_light;
+    //vec4 color_light = vec4(diffuse, spec);
+    //vec4 color_light = vec4(diffuse * normal_map, 1.0);
+    //Color = color_light;
    //Color = mix(color_light,fparams.vFogColor, getFogFactor(fparams,fFogCoord));
    //Color = vec4(uv, 1.0, 1.0);
    //Color = color_light;
 
-
-
-	Normal = vec4(normal, 1.0);
+  Color = vec4(diffuse, spec);
+  Normal = vec4(normal, spec);
 }
 
 #endif

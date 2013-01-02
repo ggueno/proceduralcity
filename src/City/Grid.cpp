@@ -9,8 +9,8 @@ double frand_a_b(double a, double b){
 
 Grid::Grid(vec3 leftCorner, float height, float width, int iteration,
     float parcel_min_size, float margin):
-    width(width),
-    height(height),
+    m_width(width),
+    m_height(height),
     m_parcel_min_size(parcel_min_size),
     m_margin(margin)
     {
@@ -29,14 +29,24 @@ void Grid::createRoads(vec3 leftCorner, float height, float width, int it){
 
     if( it == 0) return;
 
+
+    // hauteur aléatoire en fonction de la proximité du centre(0,0)
+    float hauteurMin;
+    float hauteurMax;
+
+
     if( height / 2.0 < m_parcel_min_size || width / 2.0 < m_parcel_min_size) {
 
+        hauteurMin = (((m_width / 2.0) - abs(leftCorner.x) + (m_height / 2.0) - abs(leftCorner.y))/ (m_width + m_height)) * 15;
+        hauteurMax = hauteurMin * 1.2;
         listParcels.push_back(
             new Parcel(
                 vec3(leftCorner.x+m_margin, 0.0, leftCorner.z+m_margin),
                 vec3(leftCorner.x+m_margin, 0.0, leftCorner.z-m_margin+height),
                 vec3(leftCorner.x-m_margin+width, 0.0, leftCorner.z-m_margin+height),
-                vec3(leftCorner.x-m_margin+width, 0.0, leftCorner.z+m_margin)
+                vec3(leftCorner.x-m_margin+width, 0.0, leftCorner.z+m_margin),
+                hauteurMax,
+                hauteurMin
             )
         );
     }else{
@@ -69,49 +79,64 @@ void Grid::createRoads(vec3 leftCorner, float height, float width, int it){
         vec3 intersect = vec3(tmp1.x, 0.0, tmp3.z);
 
 
-
-
         if(it == 1){
             //Margin
 
+            hauteurMin = (((m_width / 2.0) - abs(leftCorner.x) + (m_height / 2.0) - abs(leftCorner.y))/ (m_width + m_height)) * 15;
+            hauteurMax = hauteurMin * 3.0;
             //Top left parcel
             listParcels.push_back(
                 new Parcel(
                     vec3(leftCorner.x+m_margin, 0.0, leftCorner.z+m_margin),
                     vec3(tmp3.x+m_margin, 0.0, tmp3.z-m_margin),
                     vec3(intersect.x-m_margin, 0.0, intersect.z-m_margin),
-                    vec3(tmp1.x-m_margin, 0.0, tmp1.z+m_margin)
+                    vec3(tmp1.x-m_margin, 0.0, tmp1.z+m_margin),
+                    hauteurMax,
+                    hauteurMin
                 )
             );
 
 
+            hauteurMin = (((m_width / 2.0) - abs(tmp1.x) + (m_height / 2.0) - abs(tmp1.y))/ (m_width + m_height)) * 15;
+            hauteurMax = hauteurMin * 2.0;
             //Top right parcel
             listParcels.push_back(
                 new Parcel(
                     vec3(tmp1.x+m_margin, 0.0, tmp1.z+m_margin),
                     vec3(intersect.x+m_margin, 0.0, intersect.z-m_margin),
                     vec3(tmp4.x-m_margin, 0.0, tmp4.z-m_margin),
-                    vec3(leftCorner.x+width-m_margin, 0.0, leftCorner.z+m_margin)
+                    vec3(leftCorner.x+width-m_margin, 0.0, leftCorner.z+m_margin),
+                    hauteurMax,
+                    hauteurMin
                 )
             );
 
+
+            hauteurMin = (((m_width / 2.0) - abs(intersect.x) + (m_height / 2.0) - abs(intersect.y))/ (m_width + m_height)) * 15;
+            hauteurMax = hauteurMin * 2.0;
             //Bottom right parcel
             listParcels.push_back(
                 new Parcel(
                     vec3(intersect.x+m_margin,0.0, intersect.z+m_margin),
                     vec3(tmp2.x + m_margin,0.0, tmp2.z - m_margin),
                     vec3(leftCorner.x + width -m_margin,0.0, leftCorner.z + height - m_margin),
-                    vec3(tmp4.x - m_margin,0.0, tmp4.z + m_margin)
+                    vec3(tmp4.x - m_margin,0.0, tmp4.z + m_margin),
+                    hauteurMax,
+                    hauteurMin
                 )
             );
 
             //Bottom left parcel
+            hauteurMin = (((m_width / 2.0) - abs(tmp3.x) + (m_height / 2.0) - abs(tmp3.y))/ (m_width + m_height)) * 15;
+            hauteurMax = hauteurMin * 2.0;
             listParcels.push_back(
                 new Parcel(
                     vec3(tmp3.x+m_margin,0.0, tmp3.z+m_margin),
                     vec3(leftCorner.x + m_margin,0.0, leftCorner.z + height - m_margin),
                     vec3(tmp2.x -m_margin,0.0, tmp2.z - m_margin),
-                    vec3(intersect.x-m_margin,0.0, intersect.z+m_margin)
+                    vec3(intersect.x-m_margin,0.0, intersect.z+m_margin),
+                    hauteurMax,
+                    hauteurMin
                 )
             );
 

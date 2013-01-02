@@ -26,6 +26,7 @@ public:
 	void loadTextures();
     void loadFrameBuffer();
     void renderFrame();
+    void loadSkyDome();
 
     int _exMouseXPos; // Keeps the X mouse position of the previous image
 	int _exMouseYPos; // Keeps the Y mouse position of the previous image

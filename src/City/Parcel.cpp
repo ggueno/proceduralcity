@@ -8,6 +8,8 @@ void Parcel::divide(glm::vec3 leftCorner, float height, float width, int it){
 
         if( it == 0) return;
 
+        float buildingHeight = frandd_a_b(m_buildingHeightMin, m_buildingHeightMax);
+
         if( height / 2.0 < m_lotMinSize || width / 2.0 < m_lotMinSize) {
             //std::cout << height<< "<" << m_lotMinSize << std::endl;
             //std::cout << width / 2.0<< "<" << m_lotMinSize << std::endl;
@@ -17,8 +19,7 @@ void Parcel::divide(glm::vec3 leftCorner, float height, float width, int it){
                     glm::vec3(leftCorner.x, 0.0, leftCorner.z+height),
                     glm::vec3(leftCorner.x+width, 0.0, leftCorner.z+height),
                     glm::vec3(leftCorner.x+width, 0.0, leftCorner.z),
-                    m_buildingHeightMax,
-                    m_buildingHeightMin
+                    buildingHeight
                 )
             );
         }else{
@@ -49,8 +50,7 @@ void Parcel::divide(glm::vec3 leftCorner, float height, float width, int it){
                         glm::vec3(tmp3.x, 0.0, tmp3.z),
                         glm::vec3(intersect.x, 0.0, intersect.z),
                         glm::vec3(tmp1.x, 0.0, tmp1.z),
-                        m_buildingHeightMax,
-                        m_buildingHeightMin
+                        buildingHeight
                     )
                 );
 
@@ -62,8 +62,7 @@ void Parcel::divide(glm::vec3 leftCorner, float height, float width, int it){
                         glm::vec3(intersect.x, 0.0, intersect.z),
                         glm::vec3(tmp4.x, 0.0, tmp4.z),
                         glm::vec3(leftCorner.x+width, 0.0, leftCorner.z),
-                        m_buildingHeightMax,
-                        m_buildingHeightMin
+                        buildingHeight
                     )
                 );
 
@@ -74,8 +73,7 @@ void Parcel::divide(glm::vec3 leftCorner, float height, float width, int it){
                         glm::vec3(tmp2.x ,0.0, tmp2.z ),
                         glm::vec3(leftCorner.x + width ,0.0, leftCorner.z + height ),
                         glm::vec3(tmp4.x ,0.0, tmp4.z ),
-                        m_buildingHeightMax,
-                        m_buildingHeightMin
+                        buildingHeight
                     )
                 );
 
@@ -86,8 +84,7 @@ void Parcel::divide(glm::vec3 leftCorner, float height, float width, int it){
                         glm::vec3(leftCorner.x ,0.0, leftCorner.z + height ),
                         glm::vec3(tmp2.x ,0.0, tmp2.z ),
                         glm::vec3(intersect.x,0.0, intersect.z),
-                        m_buildingHeightMax,
-                        m_buildingHeightMin
+                        buildingHeight
                     )
                 );
         }
