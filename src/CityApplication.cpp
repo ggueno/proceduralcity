@@ -13,7 +13,7 @@ enum textureType {
 };
 
 enum  frameBufferType {
-    FB_GBUFFER, FB_SHADDOW
+    FB_GBUFFER, FB_SHADDOW, FB_LACCUM
 };
 
 static inline float frand() {
@@ -36,7 +36,13 @@ CityApplication::CityApplication() :
     CityCamera * camera = initCamera(.06, glm::vec3(0., 0., 0.));
     loadShaders();
     loadTextures();
+    loadFrameBuffer();
     //draw beast
+
+    //init finalScreen
+    Object &quadObject = m_scene.createObject(GL_TRIANGLES);
+    buildSquare(quadObject, 1);
+    m_screen = m_scene.addObjectToDraw(quadObject.id);
 
     // On charge une grille
     Grid * g = new Grid(vec3(100.0,-1.0,-100.0), 200.0, 200.0,6,5.0,1.0);
@@ -86,7 +92,7 @@ void CityApplication::loadShaders() {
     shaders[COLOR] = loadProgram("shaders/colorShader.glsl");
     shaders[GBUFFER] = loadProgram("shaders/3_gbuffer.glsl");
     shaders[LACCUM] = loadProgram("shaders/3_laccum_spot.glsl");
-    shaders[SHADDOW] = loadProgram("shaders/3_shadowgen.glsl");
+    //shaders[SHADDOW] = loadProgram("shaders/3_shadowgen.glsl");
     m_scene.setDefaultShaderID(shaders[GBUFFER]);
 
 
@@ -156,168 +162,106 @@ void CityApplication::animate() {
 
 
 void CityApplication::renderFrame() {
-    std::cout << "renderFrame" << std::endl;
+  
+  // Get camera matrices
+  glBindFramebuffer(GL_FRAMEBUFFER, buffers[FB_GBUFFER].fbo);
+  glDrawBuffers(buffers[FB_GBUFFER].outCount, buffers[FB_GBUFFER].drawBuffers);
+  glViewport(0, 0, m_width, m_height);
 
-            // Get camera matrices
+  // Default states
+  glEnable(GL_DEPTH_TEST);
 
-       //  float viewProjection[16];
-       //  float iviewProjection[16];
+  // Clear the front buffer
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-       //  mat4fMul( worldToView, projection, viewProjection);
-       //  mat4fInverse(viewProjection, iviewProjection);
+  // Bind gbuffer shader
+  glUseProgram(shaders[GBUFFER]);
 
-        //glBindFramebuffer(GL_FRAMEBUFFER, buffers[FB_GBUFFER].fbo);
-        //glDrawBuffers(buffers[FB_GBUFFER].outCount, buffers[FB_GBUFFER].drawBuffers);
-
-        // Viewport 
-        //camera.setViewport(0, 0, width, height);
-
-        // Default states
-        glEnable(GL_DEPTH_TEST);
-
-        // Clear the front buffer
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  // Upload uniforms
+  m_scene.drawObjectsOfScene(shaders[GBUFFER]);
 
 
-       //  // Default states
-       //  glDepthMask(GL_FALSE);
-       //  glEnable( GL_BLEND );
-       //  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  //LACCUM
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);
+  glViewport( 0, 0, m_width, m_height  );
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-       //  glUseProgram( sky_shader.program );
-       //  glUniformMatrix4fv(sky_projectionLocation, 1, 0, projection);
-       //  glUniformMatrix4fv(sky_viewLocation, 1, 0, worldToView);
-       //  glUniformMatrix4fv(sky_objectLocation, 1, 0, objectToWorld);
-       //  glUniform1i( sky_skyTexLocation, 0 );
+  // // Bind laccum shader
+  glUseProgram(shaders[LACCUM]);
 
-       //  // Bind sky texture and draw
-       //  glActiveTexture( GL_TEXTURE0 );
-       //  glBindTexture( GL_TEXTURE_2D, textures[2] );
-       //  glBindVertexArray( vao[0] );
-       //  glDrawElements( GL_TRIANGLES, sky_triangleCount*3, GL_UNSIGNED_INT, (void*)0 );
-       //  glDisable(GL_BLEND);
-       //  glDepthMask(GL_TRUE);
+  // // Compute light positions
+  glm::vec3 lightPosition(5.0, 5.0, 5.0);
+  //float lightPosition[3] = { sin(t) * 10.0, 5.0, cos(t) * 10.0};
+  glm::vec3 lightTarget(0.0, 0.0, 0.0);
+  glm::vec3 lightDirection;
+  glm::vec3 lightUp(0.0, 1.0, 0.0);
+  lightDirection = lightTarget - lightPosition;
+  lightDirection = glm::normalize(lightDirection);
+  glm::vec3 lightColor(1.0, 1.0, 1.0);
+  float lightIntensity = 1.0;
 
-        // Bind gbuffer shader
-        glUseProgram(shaders[GBUFFER]);
-        // Upload uniforms
-        m_scene.drawObjectsOfScene(shaders[GBUFFER]);
+  // // Compute locations for light accumulation shader
+  float shadowBias = 0.001f;
+  float shadowSamples = 1.0;
+  float shadowSampleSpread = 800.0;
 
-       //  //b->drawMeshSimple();
-       // //g->draw();
+  static const float MAT4F_M1_P1_TO_P0_P1array[16] =  
+  {
+    0.5f, 0.f, 0.f, 0.f,
+    0.f, 0.5f, 0.f, 0.f,
+    0.f, 0.f, 0.5f, 0.f,
+    0.5f, 0.5f, 0.5f, 1.f
+  };
+  glm::mat4 MAT4F_M1_P1_TO_P0_P1 = glm::make_mat4(MAT4F_M1_P1_TO_P0_P1array);
+  // Build shadow matrices
+  glm::mat4 worldToLight = glm::lookAt(lightPosition, lightTarget, lightUp);
+  glm::mat4 shadowProjection = glm::perspective(60.f, 1.f, 1.0f, 1000.f);    
+  glm::mat4 projectionLight = worldToLight * shadowProjection;
+  glm::mat4 projectionLightBias = projectionLight * MAT4F_M1_P1_TO_P0_P1;
 
-       //  //cylinder->drawMeshSimple();
-       //  //cone->drawMeshSimple();
-       //  //plane->drawObject();
+  // // Upload uniforms
+  glm::mat4 projMat = glm::ortho(-0.5f, 0.5f, -0.5f, 0.5f, -1.0f, 1.0f );
+  glUniformMatrix4fv(glGetUniformLocation(shaders[LACCUM], "Projection"), 1, 0, glm::value_ptr(projMat));
+  glUniform1i(glGetUniformLocation(shaders[LACCUM], "Material"), 0);
+  glUniform1i(glGetUniformLocation(shaders[LACCUM], "Normal"), 1);
+  glUniform1i(glGetUniformLocation(shaders[LACCUM], "Depth"), 2);
+  //glUniform1i(glGetUniformLocation(shader[LACCUM], "Shadow"), 3);
+  glUniform3fv(glGetUniformLocation(shaders[LACCUM], "CameraPosition"), 1, glm::value_ptr(m_scene.camera->getPosition()));
+  glUniformMatrix4fv(glGetUniformLocation(shaders[LACCUM], "InverseViewProjection"), 1, 0, glm::value_ptr(glm::inverse(m_scene.camera->getView()*m_scene.camera->getProjection())));
+  glUniformMatrix4fv(glGetUniformLocation(shaders[LACCUM], "ProjectionLight"), 1, 0,glm::value_ptr(projectionLightBias));
+  glUniform1f(glGetUniformLocation(shaders[LACCUM], "ShadowBias"),shadowBias);
+  glUniform1f(glGetUniformLocation(shaders[LACCUM], "ShadowSamples"),shadowSamples);
+  glUniform1f(glGetUniformLocation(shaders[LACCUM], "ShadowSampleSpread"),shadowSampleSpread);
 
-       //  glActiveTexture(GL_TEXTURE0);
-       //  glBindTexture(GL_TEXTURE_2D, textures[3]);
-       //  s->drawMeshSimple();
+  // Bind color to unit 0
+  glActiveTexture(GL_TEXTURE0);
+  glBindTexture(GL_TEXTURE_2D, buffers[FB_GBUFFER].colorTexId[0]);        
+  // Bind normal to unit 1
+  glActiveTexture(GL_TEXTURE1);
+  glBindTexture(GL_TEXTURE_2D, buffers[FB_GBUFFER].colorTexId[1]);    
+  // Bind depth to unit 2
+  glActiveTexture(GL_TEXTURE2);
+  glBindTexture(GL_TEXTURE_2D, buffers[FB_GBUFFER].depthTexId);        
+  // Bind shadow map to unit 3
+  //glActiveTexture(GL_TEXTURE3);
+  //glBindTexture(GL_TEXTURE_2D, shadow.depthTexId);        
 
-       //  glBindFramebuffer(GL_FRAMEBUFFER, 0);
-       //  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  // Blit above the rest
+  glDisable(GL_DEPTH_TEST);
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_ONE, GL_ONE);
 
-       //  // Compute light positions
-       //  //float lightPosition[3] = { 0.0, 25.0, 0.0};
-       //  float lightPosition[3] = { 0.0, 50.0, 0.0};
-       //  float lightTarget[3] = { 0.0, 5.0, 0.0};
-       //  float lightDirection[3];
-       //  float lightUp[3] = { 0.0, 1.0, 0.0};
-       //  vec3fSub(lightTarget, lightPosition, lightDirection);
-       //  vec3fNormalize(lightDirection, vec3fNorm(lightDirection));
-       //  float lightColor[3] = {1.0, 1.0, 1.0};
-       //  float lightIntensity = 1.0;
+  // Light uniforms
+  glUniform3fv(glGetUniformLocation(shaders[LACCUM], "LightPosition"), 1, glm::value_ptr(lightDirection));
+  glUniform3fv(glGetUniformLocation(shaders[LACCUM], "LightDirection"), 1, glm::value_ptr(lightPosition));
+  glUniform3fv(glGetUniformLocation(shaders[LACCUM], "LightColor"), 1, glm::value_ptr(lightColor));
+  glUniform1f(glGetUniformLocation(shaders[LACCUM], "LightIntensity"), lightIntensity);
 
+  // Draw quad
+  m_scene.drawObject(m_screen);
 
-       //  // Build shadow matrices
-       //  float shadowProjection[16];
-       //  float worldToLight[16];
-       //  lookAt(lightPosition, lightTarget, lightUp, worldToLight);
-       //  perspective(60.f, 1.f, 1.0f, 1000.f, shadowProjection );
-       //  float projectionLight[16];
-       //  float projectionLightBias[16];
-       //  mat4fMul( worldToLight, shadowProjection,  projectionLight);
-       //  mat4fMul( projectionLight, MAT4F_M1_P1_TO_P0_P1, projectionLightBias);
+  glDisable(GL_BLEND);
 
-       //  glBindFramebuffer(GL_FRAMEBUFFER,shadowBuffer.fbo);
-       //  glDrawBuffers(shadowBuffer.outCount, shadowBuffer.drawBuffers);
-       //  // Clear the front buffer
-       //  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-       //  // Viewport
-       //  glViewport( 0, 0, size, size  );
-       //  camera.setViewport(0, 0, size, size);
-
-       //  // Default states
-       //  glEnable(GL_DEPTH_TEST);
-
-       //  // Bind gbuffer shader
-       //  glUseProgram(shadowgen_shader.program);
-       //  // Upload uniforms
-       //  glUniformMatrix4fv(shadowgen_projectionLocation, 1, 0, shadowProjection);
-       //  glUniformMatrix4fv(shadowgen_viewLocation, 1, 0, worldToLight);
-       //  glUniformMatrix4fv(shadowgen_objectLocation, 1, 0, objectToWorld);
-       //  glUniform1f(shadowgen_timeLocation, t);
-
-       //  // for(int i=0; i<buildings.size(); ++i){
-       //  //     buildings[i]->drawObject(shadowgen_shader.program);
-       //  // }
-
-
-       //  glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-       //  glViewport( 0, 0, width, height  );
-
-       //  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-       //  // Bind laccum shader
-       //  glUseProgram(laccum_shader.program);
-       //  // Upload uniforms
-       //  glUniformMatrix4fv(laccum_projectionLocation, 1, 0, orthoProj);
-       //  glUniformMatrix4fv(laccum_viewLocation, 1, 0, worldToLight);
-       //  glUniformMatrix4fv(laccum_objectLocation, 1, 0, objectToWorld);
-       //  glUniform1i(laccum_materialLocation, 0);
-       //  glUniform1i(laccum_normalLocation, 1);
-       //  glUniform1i(laccum_depthLocation, 2);
-       //  glUniform1i(laccum_shadow, 3);
-       //  glUniform3fv(laccum_cameraPositionLocation, 1, cameraPosition);
-       //  glUniformMatrix4fv(laccum_inverseViewProjectionLocation, 1, 0, iviewProjection);
-       //  glUniformMatrix4fv(laccum_projectionLightBias, 1, 0, projectionLightBias);
-       //  glUniform1f(laccum_bias,shadowBias);
-       //  glUniform1f(laccum_sample,samples);
-       //  glUniform1f(laccum_spread,spread);
-
-       //  // Bind color to unit 0
-       //  glActiveTexture(GL_TEXTURE0);
-       //  glBindTexture(GL_TEXTURE_2D, gbuffer.colorTexId[0]);
-       //  // Bind normal to unit 1
-       //  glActiveTexture(GL_TEXTURE1);
-       //  glBindTexture(GL_TEXTURE_2D, gbuffer.colorTexId[1]);
-       //  // Bind depth to unit 2
-       //  glActiveTexture(GL_TEXTURE2);
-       //  glBindTexture(GL_TEXTURE_2D, gbuffer.depthTexId);
-
-       //  glActiveTexture(GL_TEXTURE3);
-       //  glBindTexture(GL_TEXTURE_2D, shadowBuffer.depthTexId);
-
-       //  // Blit above the rest
-       //  glDisable(GL_DEPTH_TEST);
-
-       //  glEnable(GL_BLEND);
-       //  glBlendFunc(GL_ONE, GL_ONE);
-
-       //  // Light uniforms
-       //  glUniform3fv(laccum_lightDirectionLocation, 1, lightDirection);
-       //  glUniform3fv(laccum_lightPositionLocation, 1, lightPosition);
-       //  glUniform3fv(laccum_lightColorLocation, 1, lightColor);
-       //  glUniform1f(laccum_lightIntensityLocation, lightIntensity);
-       //  //glUniform1i(laccum_shadow, shadowBuffer.depthTexId);
-
-       //  // Draw quad
-       //  quad->drawMeshSimple();
-       //  glDisable(GL_BLEND);
-
-
-     // Performs the buffer swap between the current shown buffer, and the one we just worked on
-    glfwSwapBuffers();
-
+  // Performs the buffer swap between the current shown buffer, and the one we just worked on
+  glfwSwapBuffers();
 }

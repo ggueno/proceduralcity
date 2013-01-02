@@ -77,6 +77,7 @@ public:
 
     void drawObjectsOfScene(int timer);
     void drawObjectsOfScene(GLuint shaderId);
+    void drawObject(GLuint id);
 private:
     void setAppearance(const ObjectInstance &, int timer);
     void setAppearance(const ObjectInstance &instance, GLuint shaderId, bool texture = true);

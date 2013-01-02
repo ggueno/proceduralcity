@@ -1,23 +1,27 @@
-#if defined(VERTEX)
+#version 150
 
 uniform mat4 Projection;
 uniform mat4 View;
 uniform mat4 Object;
 
-in vec3 VertexPosition;
-in vec3 VertexTexCoord;
+#ifdef _VERTEX_
+
+in vec3 vertexPosition;
+in vec3 vertexNormal;
+in vec4 vertexColor;
+in vec2 vertexUv;
 
 out vec2 uv;
 
 void main(void)
 {
-    uv = VertexTexCoord.xy;
-	gl_Position = Projection * vec4(VertexPosition, 1.0);
+    uv = vertexUv.xy;
+	gl_Position = Projection * vec4(vertexPosition, 1.0);
 }
 
 #endif
 
-#if defined(FRAGMENT)
+#ifdef _FRAGMENT_
 
 in vec2 uv;
 

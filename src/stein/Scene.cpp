@@ -232,4 +232,9 @@ void Scene::drawObjectsOfScene(GLuint shaderId) {
     }
 }
 
+void Scene::drawObject(GLuint id){
+    const ObjectInstance &instance = drawnObjects[id];
+    storedObjects[instance.objectId]->drawObject();
+}
+
 } // namespace stein

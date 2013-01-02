@@ -10,6 +10,10 @@
 #include "City/Grid.hpp"
 #include "CityCamera.hpp"
 
+#include <glm/gtc/type_ptr.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+
+
 class CityApplication : public stein::Application {
 public:
     CityApplication();
@@ -27,6 +31,7 @@ public:
 	int _exMouseYPos; // Keeps the Y mouse position of the previous image
 	bool _leftButtonPressed; // Keeps the left button of the mouse value (PRESS or RELEASE)
 	float _bias;
+    GLuint m_screen;
     GLuint shaders[4];
     GLuint textures[4][3];
     FramebufferGL buffers[4];
