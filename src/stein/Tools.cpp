@@ -227,6 +227,11 @@ GLuint loadProgram(const vector<string> &files) {
 }
 
 // Passing the matrices to the shader
+void setModelInShader(GLuint shaderID, const mat4 &model){
+    GLenum toTranspose = GL_FALSE;
+    glUniformMatrix4fv(glGetUniformLocation(shaderID, "model"), 1, toTranspose, (const float*) glm::value_ptr(model));
+}
+
 void setMatricesInShader(GLuint shaderID, const mat4 &model, const mat4 &view, const vec3 &eye, const mat4 &projection) {
     GLenum toTranspose = GL_FALSE;
     glUniformMatrix4fv(glGetUniformLocation(shaderID, "model"), 1, toTranspose, (const float*) glm::value_ptr(model));

@@ -76,11 +76,11 @@ public:
     void setLight(GLfloat * position, GLfloat power);
 
     void drawObjectsOfScene(int timer);
-    void drawObjectsOfScene(GLuint shaderId);
+    void drawObjectsOfScene(GLuint shaderId, bool texture = true, bool camera = true);
     void drawObject(GLuint id);
 private:
     void setAppearance(const ObjectInstance &, int timer);
-    void setAppearance(const ObjectInstance &instance, GLuint shaderId, bool texture = true);
+    void setAppearance(const ObjectInstance &instance, GLuint shaderId, bool texture = true, bool camera = true);
 };
 
 } // namespace stein

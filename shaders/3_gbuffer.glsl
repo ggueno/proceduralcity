@@ -123,8 +123,8 @@ void main(void)
 
     //vec4 color_light = vec4(1.0-uv.x*0.5, 1.0-uv.y*0.5, 1.0, spec);
     vec4 color_light = vec4(diffuse, 1.0);
-    //Color = color_light;
-   Color = mix(color_light,fparams.vFogColor, getFogFactor(fparams,fFogCoord));
+    Color = color_light;
+   //Color = mix(color_light,fparams.vFogColor, getFogFactor(fparams,fFogCoord));
    //Color = vec4(uv, 1.0, 1.0);
    //Color = color_light;
 

@@ -13,7 +13,7 @@ enum textureType {
 };
 
 enum  frameBufferType {
-    FB_GBUFFER, FB_SHADDOW, FB_LACCUM
+    FB_GBUFFER, FB_SHADDOW
 };
 
 static inline float frand() {
@@ -42,7 +42,7 @@ CityApplication::CityApplication() :
     //init finalScreen
     Object &quadObject = m_scene.createObject(GL_TRIANGLES);
     buildSquare(quadObject, 1);
-    //m_screen = m_scene.addObjectToDraw(quadObject.id);
+    m_screen = m_scene.addObjectToDraw(quadObject.id);
 
     // On charge une grille
     Grid * g = new Grid(vec3(100.0,-1.0,-100.0), 200.0, 200.0,6,5.0,1.0);
@@ -92,7 +92,7 @@ void CityApplication::loadShaders() {
     shaders[COLOR] = loadProgram("shaders/colorShader.glsl");
     shaders[GBUFFER] = loadProgram("shaders/3_gbuffer.glsl");
     shaders[LACCUM] = loadProgram("shaders/3_laccum_spot.glsl");
-    //shaders[SHADDOW] = loadProgram("shaders/3_shadowgen.glsl");
+    shaders[SHADDOW] = loadProgram("shaders/3_shadowgen.glsl");
     m_scene.setDefaultShaderID(shaders[GBUFFER]);
 
 
@@ -162,34 +162,8 @@ void CityApplication::animate() {
 
 
 void CityApplication::renderFrame() {
-  
-  // Get camera matrices
-  glBindFramebuffer(GL_FRAMEBUFFER, buffers[FB_GBUFFER].fbo);
-  glDrawBuffers(buffers[FB_GBUFFER].outCount, buffers[FB_GBUFFER].drawBuffers);
-  glViewport(0, 0, m_width, m_height);
-
-  // Default states
-  glEnable(GL_DEPTH_TEST);
-
-  // Clear the front buffer
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-  // Bind gbuffer shader
-  glUseProgram(shaders[GBUFFER]);
-
-  // Upload uniforms
-  m_scene.drawObjectsOfScene(shaders[GBUFFER]);
-
-
-  //LACCUM
-  glBindFramebuffer(GL_FRAMEBUFFER, 0);
-  glViewport( 0, 0, m_width, m_height );
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-  // // Bind laccum shader
-  glUseProgram(shaders[LACCUM]);
-
-  // // Compute light positions
+  //INIT
+    // // Compute light positions
   glm::vec3 lightPosition(5.0, 5.0, 5.0);
   //float lightPosition[3] = { sin(t) * 10.0, 5.0, cos(t) * 10.0};
   glm::vec3 lightTarget(0.0, 0.0, 0.0);
@@ -201,7 +175,7 @@ void CityApplication::renderFrame() {
   float lightIntensity = 1.0;
 
   // // Compute locations for light accumulation shader
-  float shadowBias = 0.001f;
+  float shadowBias = 0.01f;
   float shadowSamples = 1.0;
   float shadowSampleSpread = 800.0;
 
@@ -220,7 +194,60 @@ void CityApplication::renderFrame() {
   glm::mat4 projectionLightBias = projectionLight * MAT4F_M1_P1_TO_P0_P1;
 
   // // Upload uniforms
-  glm::mat4 projMat = glm::ortho(-400.0f, 400.0f, -400.0f, 400.0f, -1.0f, 1.0f );
+  glm::mat4 projMat = glm::ortho(-0.5f, 0.5f, -0.5f, 0.5f, -1.0f, 1.0f );
+
+
+  // Get camera matrices
+  glBindFramebuffer(GL_FRAMEBUFFER, buffers[FB_GBUFFER].fbo);
+  glDrawBuffers(buffers[FB_GBUFFER].outCount, buffers[FB_GBUFFER].drawBuffers);
+  glViewport(0, 0, m_width, m_height);
+
+  // Default states
+  glEnable(GL_DEPTH_TEST);
+
+  // Clear the front buffer
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+  // Bind gbuffer shader
+  glUseProgram(shaders[GBUFFER]);
+
+  // Upload uniforms
+  m_scene.drawObjectsOfScene(shaders[GBUFFER]);
+
+
+
+  // Bind shadow fbo
+  glBindFramebuffer(GL_FRAMEBUFFER, buffers[FB_SHADDOW].fbo);
+  glDrawBuffers(buffers[FB_SHADDOW].outCount, buffers[FB_SHADDOW].drawBuffers);
+
+  // Viewport 
+  glViewport( 0, 0, 1024, 1024);
+
+  // Default states
+  glEnable(GL_DEPTH_TEST);
+
+  // Clear the front buffer
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+  // Bind shadowgen shader
+  glUseProgram(shaders[SHADDOW]);
+  // Upload uniforms
+  glUniformMatrix4fv(glGetUniformLocation(shaders[SHADDOW], "projection"), 1, 0,  glm::value_ptr(shadowProjection));
+  glUniformMatrix4fv(glGetUniformLocation(shaders[SHADDOW], "view"), 1, 0,  glm::value_ptr(worldToLight));
+
+  // Render vaos
+  glCullFace(GL_FRONT);
+  m_scene.drawObjectsOfScene(shaders[SHADDOW],false, false);
+  glCullFace(GL_BACK);
+
+  //LACCUM
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);
+  glViewport( 0, 0, m_width, m_height  );
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+  // // Bind laccum shader
+  glUseProgram(shaders[LACCUM]);
+
   glUniformMatrix4fv(glGetUniformLocation(shaders[LACCUM], "Projection"), 1, 0, glm::value_ptr(projMat));
   glUniform1i(glGetUniformLocation(shaders[LACCUM], "Material"), 0);
   glUniform1i(glGetUniformLocation(shaders[LACCUM], "Normal"), 1);
@@ -243,8 +270,8 @@ void CityApplication::renderFrame() {
   glActiveTexture(GL_TEXTURE2);
   glBindTexture(GL_TEXTURE_2D, buffers[FB_GBUFFER].depthTexId);        
   // Bind shadow map to unit 3
-  //glActiveTexture(GL_TEXTURE3);
-  //glBindTexture(GL_TEXTURE_2D, shadow.depthTexId);        
+  glActiveTexture(GL_TEXTURE3);
+  glBindTexture(GL_TEXTURE_2D, buffers[FB_SHADDOW].depthTexId);        
 
   // Blit above the rest
   glDisable(GL_DEPTH_TEST);

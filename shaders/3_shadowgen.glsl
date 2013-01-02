@@ -1,38 +1,40 @@
-#if defined(VERTEX)
-uniform mat4 Projection;
-uniform mat4 View;
-uniform mat4 Object;
+#version 150
 
-in vec3 VertexPosition;
-in vec3 VertexNormal;
-in vec2 VertexTexCoord;
+uniform mat4 projection;
+uniform mat4 view;
+uniform mat4 model;
+
+#ifdef _VERTEX_
+
+in vec3 vertexPosition;
+in vec3 vertexNormal;
+in vec4 vertexColor;
+in vec2 vertexUv;
 
 out vec2 uv;
 out vec3 normal;
 out vec3 position;
 
 void main(void)
-{
-	uv = VertexTexCoord;
-	normal = vec3(vec4(VertexNormal, 1.0) * inverse(Object) );
-	position = vec3(Object * vec4(VertexPosition, 1.0));
-	position.y += (gl_InstanceID * 1.5);
-	position.x += (gl_InstanceID * 1.5);
-	gl_Position = Projection * View * Object * vec4(position, 1.0);
+{	
+	uv = vertexTexCoord;
+	normal = vec3(model * vec4(vertexNormal, 1.0));; 
+	position = vec3(model * vec4(vertexPosition, 1.0));
+	//position.y += (gl_InstanceID * 1.5); 
+	//position.x += (gl_InstanceID * 1.5); 
+	gl_Position = projection * view * model * vec4(position, 1.0);
 }
 
 #endif
 
-#if defined(FRAGMENT)
+#ifdef _FRAGMENT_
 
 out vec4  Color;
 
-
 in vec3 normal;
-in vec2 uv;
+
 void main(void)
 {
-
 }
 
 #endif

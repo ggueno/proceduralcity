@@ -42,7 +42,7 @@ void setMaterialInShader(GLuint shaderID, GLfloat * ambient, GLfloat * diffuse, 
 void setFilledDataInShader(GLuint shaderID, GLboolean positions, GLboolean normals, GLboolean uvs, GLboolean colors);
 void setTextureUnitsInShader(GLuint shaderID);
 void setTimerInShader(GLuint shaderID, GLfloat timer);
-
+void setModelInShader(GLuint shaderID, const glm::mat4 &model);
 
 void changeMaterialColorInShader(GLuint shaderID, GLfloat * color);
 

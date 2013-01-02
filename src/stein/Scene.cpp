@@ -174,13 +174,17 @@ void Scene::setAppearance(const ObjectInstance &instance, int timer) {
 
 
 // Decides what will elements drawn after this call will look like
-void Scene::setAppearance(const ObjectInstance &instance, GLuint shaderId, bool texture) {
+void Scene::setAppearance(const ObjectInstance &instance, GLuint shaderId, bool texture, bool c) {
 
     //glUseProgram(shaderId); // From now on, this shader will be used.
 
     // We use the specific values of model per object
-    setMatricesInShader(shaderId, instance.transformation, camera->getView(), camera->getPosition(), camera->getProjection());
-    glUniform4fv(glGetUniformLocation(shaderId, "color"), 1, instance.color);
+    if(c){
+        setMatricesInShader(shaderId, instance.transformation, camera->getView(), camera->getPosition(), camera->getProjection());
+        glUniform4fv(glGetUniformLocation(shaderId, "color"), 1, instance.color);
+    }else{
+        setModelInShader(shaderId, instance.transformation);
+    }
 
     // Specifies which VBO were filled
     const Object * pObject = storedObjects[instance.objectId];
@@ -188,7 +192,7 @@ void Scene::setAppearance(const ObjectInstance &instance, GLuint shaderId, bool 
     setFilledDataInShader(shaderId, pObject->hasPrimitives(), pObject->hasNormals(), pObject->hasUvs(), pObject->hasColors());
 
     // Sets the light in the current shader
-    setLightInShader(shaderId, lightPosition, lightPower);
+    //setLightInShader(shaderId, lightPosition, lightPower);
     //setTimerInShader(shaderId, (GLfloat) timer);
 
     //TO DO : Bind Texture
@@ -222,15 +226,16 @@ void Scene::drawObjectsOfScene(int timer) {
     }
 }
 
-void Scene::drawObjectsOfScene(GLuint shaderId) {
+void Scene::drawObjectsOfScene(GLuint shaderId, bool texture, bool camera) {
     for (size_t i = 0; i < drawnObjects.size(); ++i) {
         if(drawnObjects[i].objectId !=-1){
             const ObjectInstance &instance = drawnObjects[i];
-            setAppearance(instance,shaderId);
+            setAppearance(instance, shaderId, texture, camera);
             storedObjects[instance.objectId]->drawObject();
         }
     }
 }
+
 
 void Scene::drawObject(GLuint id){
     const ObjectInstance &instance = drawnObjects[id];
