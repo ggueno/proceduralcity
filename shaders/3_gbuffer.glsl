@@ -56,12 +56,8 @@ void main(void)
     vec4 vEyeSpacePosVertex = view * model * vec4(vertexPosition,1.0);
     vEyeSpacePos = vEyeSpacePosVertex;
 
-
   gl_Position = projection * vEyeSpacePosVertex;
 	normal = vec3(vec4(vertexNormal, 1.0) * inverse(model) );
-
-	//position = vec3(Object * vec4(VertexPosition, 1.0));
-	//gl_Position = Projection * View * Object * vec4(position, 1.0);
 }
 
 #endif
@@ -123,18 +119,18 @@ void main(void)
     fparams.vFogColor = vec4(1.0f, 1.0f, 1.0f, 1.0f);
     fparams.fStart = 10.0f;
     fparams.fEnd = 100.0f;
-    fparams.fDensity = 0.01f;
+    fparams.fDensity = 0.005f;
     fparams.iEquation = 2;
 
     //vec4 color_light = vec4(1.0-uv.x*0.5, 1.0-uv.y*0.5, 1.0, spec);
     //vec4 color_light = vec4(diffuse, spec);
-    //vec4 color_light = vec4(diffuse * normal_map, 1.0);
+    vec4 color_light = vec4(diffuse * normal_map, spec);
     //Color = color_light;
-   //Color = mix(color_light,fparams.vFogColor, getFogFactor(fparams,fFogCoord));
+   Color = mix(color_light,fparams.vFogColor, getFogFactor(fparams,fFogCoord));
    //Color = vec4(uv, 1.0, 1.0);
    //Color = color_light;
 
-  Color = vec4(diffuse, spec);
+  //Color = vec4(diffuse, spec);
   Normal = vec4(normal, spec);
 }
 

@@ -21,7 +21,7 @@ static inline float frand() {
 }
 
 CityApplication::CityApplication() :
-    stein::Application(800, 800)
+    stein::Application(1024, 1024)
     {
 
     const float size = .04;
@@ -33,11 +33,11 @@ CityApplication::CityApplication() :
     //m_scene.camera.setPerspectiveProjection(-size, size, -size, size, near, far);
     //m_scene.camera.setPosition(vec3(0, 10, -100));
 
-    CityCamera * camera = initCamera(.06, glm::vec3(0., 0., 0.));
+    CityCamera * camera = initCamera(.06, glm::vec3(10., 3., 10.));
     loadShaders();
     loadTextures();
     loadFrameBuffer();
-    //loadSkyDome();
+    loadSkyDome();
     //draw beast
 
     //init finalScreen
@@ -54,7 +54,7 @@ CityApplication::CityApplication() :
 
     // //On créer les buildins de base à construire
     Object &building = m_scene.createObject(GL_TRIANGLES);
-    buildCube(building);
+    buildBuildingBlock(building);
 
     GLuint element;
 
@@ -95,7 +95,7 @@ void CityApplication::loadSkyDome(){
   m_scene.setDrawnObjectTextureID0(element, textures[SKYDOME][0]);
   //m_scene.setDrawnObjectTextureID1(element, textures[SKYDOME][1]);
   //m_scene.setDrawnObjectTextureID2(element, textures[SKYDOME][2]);
-  m_scene.setDrawnObjectModel(element, scalee(vec3(200.0, 200.0, 200.0)));
+  m_scene.setDrawnObjectModel(element, scalee(vec3(300.0, 300.0, 300.0)));
 
 
 }
@@ -113,9 +113,8 @@ void CityApplication::loadShaders() {
 
 void CityApplication::loadTextures(){
     textures[BATIMENT][0] = loadTexture("textures/acera.tga", 0);
-    textures[BATIMENT][1] = loadTexture("textures/spnza_bricks_a_spec.tga", 1);
+    textures[BATIMENT][1] = loadTexture("textures/acera1-spec.jpg", 1);
     textures[BATIMENT][2] = loadTexture("textures/normalmap.tga", 2);
-
 
     //SKYDOME
     textures[SKYDOME][0] = loadTexture("textures/skybox.jpg", 0);
@@ -141,7 +140,7 @@ void CityApplication::loadFrameBuffer(){
 
 CityCamera * CityApplication::initCamera(const float size, glm::vec3 position) {
     m_scene.camera = new CityCamera();
-    m_scene.camera->setPerspectiveProjection(-size, size, -size, size, .1, 500);
+    m_scene.camera->setPerspectiveProjection(-size, size, -size, size, .1, 1000);
     m_scene.camera->setPosition(position);
     return (CityCamera*)m_scene.camera;
 }
@@ -180,20 +179,23 @@ void CityApplication::animate() {
 
 void CityApplication::renderFrame() {
   //INIT
+  float t = glfwGetTime();
+
     // // Compute light positions
-  glm::vec3 lightPosition(2.0, 2.0, 2.0);
+  glm::vec3 lightPosition(10.0, 10.0, 10.0);
   //float lightPosition[3] = { sin(t) * 10.0, 5.0, cos(t) * 10.0};
   glm::vec3 lightTarget(0.0, 0.0, 0.0);
   glm::vec3 lightDirection;
-  glm::vec3 lightUp(0.0, 1.0, 0.0);
+  glm::vec3 lightUp(0.0, 10.0, 0.0);
   lightDirection = lightTarget - lightPosition;
   lightDirection = glm::normalize(lightDirection);
   glm::vec3 lightColor(1.0, 1.0, 1.0);
   float lightIntensity = 1.0;
 
+
   // // Compute locations for light accumulation shader
-  float shadowBias = 0.01f;
-  float shadowSamples = 1.0;
+  float shadowBias = 0.008f;
+  float shadowSamples = 2.0;
   float shadowSampleSpread = 800.0;
 
   static const float MAT4F_M1_P1_TO_P0_P1array[16] =  
@@ -211,7 +213,7 @@ void CityApplication::renderFrame() {
   glm::mat4 projectionLightBias = projectionLight * MAT4F_M1_P1_TO_P0_P1;
 
   // // Upload uniforms
-  glm::mat4 projMat = glm::ortho(-0.5f, 0.5f, -0.5f, 0.5f, -1.0f, 1.0f );
+  glm::mat4 projMat = glm::ortho(-0.5f, 0.5f, 0.5f, -0.5f, -1.0f, 1.0f );
 
 
   // Get camera matrices
@@ -295,14 +297,37 @@ void CityApplication::renderFrame() {
   glEnable(GL_BLEND);
   glBlendFunc(GL_ONE, GL_ONE);
 
+  for (unsigned int i = 0; i < 10; ++i)
+  {
+      t = 10;
+      float tl = t * i;
+
+      //Update light uniforms
+      lightPosition.x = sin(tl) * 10.0;
+      lightPosition.y = 5.0; 
+      lightPosition.z = cos(tl) * 10.0;
+
+      lightDirection.x = i;
+      lightDirection.y = 0.f;
+      lightDirection.z = 0.f;
+
+      lightColor.x = sin(tl) *  1.0;
+      lightColor.y = 1.0 - cos(tl), 
+      lightColor.z = -sin(tl);
+      lightIntensity = 10.0;
+
+      glUniform3fv(glGetUniformLocation(shaders[LACCUM], "LightPosition"), 1, glm::value_ptr(lightDirection));
+      glUniform3fv(glGetUniformLocation(shaders[LACCUM], "LightDirection"), 1, glm::value_ptr(lightPosition));
+      glUniform3fv(glGetUniformLocation(shaders[LACCUM], "LightColor"), 1, glm::value_ptr(lightColor));
+      glUniform1f(glGetUniformLocation(shaders[LACCUM], "LightIntensity"), lightIntensity);
+
+      // Draw quad
+      m_scene.drawObject(m_screen);
+  }
+
   // Light uniforms
-  glUniform3fv(glGetUniformLocation(shaders[LACCUM], "LightPosition"), 1, glm::value_ptr(lightDirection));
-  glUniform3fv(glGetUniformLocation(shaders[LACCUM], "LightDirection"), 1, glm::value_ptr(lightPosition));
-  glUniform3fv(glGetUniformLocation(shaders[LACCUM], "LightColor"), 1, glm::value_ptr(lightColor));
-  glUniform1f(glGetUniformLocation(shaders[LACCUM], "LightIntensity"), lightIntensity);
 
   // Draw quad
-  m_scene.drawObject(m_screen);
 
   glDisable(GL_BLEND);
 

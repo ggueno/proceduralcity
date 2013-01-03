@@ -11,11 +11,14 @@ in vec3 vertexNormal;
 in vec4 vertexColor;
 in vec2 vertexUv;
 
+out vec4 vEyeSpacePos;
 out vec2 uv;
 
 void main(void)
 {
     uv = vertexUv.xy;
+    //vec4 vEyeSpacePosVertex = View * Object * vec4(vertexPosition,1.0);
+    //vEyeSpacePos = vEyeSpacePosVertex;
 	gl_Position = Projection * vec4(vertexPosition, 1.0);
 }
 
@@ -25,6 +28,7 @@ void main(void)
 
 
 in vec2 uv;
+in vec4 vEye;
 
 uniform sampler2D Material;
 uniform sampler2D Normal;
@@ -89,6 +93,33 @@ float random(vec4 seed)
     return fract(sin(dot_product) * 43758.5453);
 }
 
+
+struct FogParameters
+{
+   vec4 vFogColor; // Fog color
+   float fStart; // This is only for linear fog
+   float fEnd; // This is only for linear fog
+   float fDensity; // For exp and exp2 equation
+
+   int iEquation; // 0 = linear, 1 = exp, 2 = exp2
+} fogParams;
+
+float getFogFactor(FogParameters params, float fFogCoord)
+{
+   float fResult = 0.0;
+   if(params.iEquation == 0)
+      fResult = (params.fEnd-fFogCoord)/(params.fEnd-params.fStart);
+   else if(params.iEquation == 1)
+      fResult = exp(-params.fDensity*fFogCoord);
+   else if(params.iEquation == 2)
+      fResult = exp(-pow(params.fDensity*fFogCoord, 2.0));
+
+   fResult = 1.0-clamp(fResult, 0.0, 1.0);
+
+   return fResult;
+}
+
+
 void main(void)
 {
 	vec4  material = texture(Material, uv).rgba;
@@ -109,7 +140,18 @@ void main(void)
 
 	vec3 cspotlight1 = spotLight(LightColor, LightIntensity, LightDirection, LightPosition, n, position, diffuse, spec, CameraPosition );
 
-	
+	float fFogCoord = abs(vEye.z/vEye.w);
+
+    FogParameters fparams;
+    fparams.vFogColor = vec4(1.0f, 1.0f, 1.0f, 1.0f);
+    fparams.fStart = 20.0f;
+    fparams.fEnd = 100.0f;
+    fparams.fDensity = 0.01f;
+    fparams.iEquation = 2;
+
+
+	vec4 color_light;
+
 	if (wlightSpacePosition.w > 0.0  && lightSpacePosition.x > 0.0 && lightSpacePosition.x < 1.0 && lightSpacePosition.y > 0.0 && lightSpacePosition.y < 1.0 )
 	{
 		
@@ -123,14 +165,17 @@ void main(void)
 			    visibility-=visibilityOffset;
 			}
 		}
-		//Color = vec4(cspotlight1 * visibility, 1.0);
+		color_light = vec4(cspotlight1 * visibility, 1.0);
 
 	}
 	else
 	{
-		//Color = vec4(cspotlight1, 1.0);
+		color_light = vec4(cspotlight1, 1.0);
 	} 
 	
+	//Color = mix(color_light,fparams.vFogColor, getFogFactor(fparams,fFogCoord));
+	Color = color_light;
+
 	/* 
 	float shadowDepth = texture(Shadow, lightSpacePosition.xy).r;
 	Color = vec4(lightSpacePosition.z - shadowDepth , 0.0, 0.0, 1.0);
@@ -148,12 +193,11 @@ void main(void)
 	//Color = vec4(shadowDepth , 0.0, 0.0, 1.0);
 
 
-	Color = vec4(cspotlight1, 1.0);
+	//Color = vec4(cspotlight1, 1.0);
 	//Color = vec4(texture(Shadow, uv).z, 0.0 , 0.0, 1.0);
 
 	//Color = vec4(shadowDepth, 0.0, 0.0, 1.0);
 	//Color = vec4(depth, 0.0 , 0.0, 1.0);
-	//Color = vec4(normal, 1.0);
 }
 
 #endif

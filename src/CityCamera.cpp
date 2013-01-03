@@ -17,8 +17,8 @@ void CityCamera::cancelMovement() {
 	m_nextMove = glm::vec3(0., 0., 0.);
 }
 void CityCamera::setMouseMovement(int deltaX, int deltaY) {
-	m_xMousePosition += 5. * (deltaX / (GLfloat)800);
-	m_yMousePosition += -5. * (deltaY / (GLfloat)800);
+	m_xMousePosition += 10. * (deltaX / (GLfloat)1024);
+	m_yMousePosition += -10. * (deltaY / (GLfloat)1024);
 }
 
 void CityCamera::setKeyMovement(Direction to) {

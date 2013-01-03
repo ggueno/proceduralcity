@@ -18,6 +18,13 @@ bool buildObjectGeometryFromOBJ(Object &object, const char* fileName, bool smoot
 void buildSphere(Object &object, const float radius = 0.5, std::size_t discLat = 36, std::size_t discLong = 36, int normalSens = 1);
 void buildCube(Object &object, float side = 0.5);
 
+void buildBuildingBlock(Object &object);
+void buildBuildingRounded(Object &object);
+void buildBuildingBlocky(Object &object);
+void buildBuildingClassic(Object &object);
+
+
+
 } // namespace stein
 
 #endif
