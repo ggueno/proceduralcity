@@ -141,7 +141,7 @@ void Scene::setAppearance(const ObjectInstance &instance, int timer) {
     setFilledDataInShader(shaderId, pObject->hasPrimitives(), pObject->hasNormals(), pObject->hasUvs(), pObject->hasColors());
 
     // Sets the light in the current shader
-    setLightInShader(shaderId, lightPosition, lightPower);
+    //setLightInShader(shaderId, lightPosition, lightPower);
     setTimerInShader(shaderId, (GLfloat) timer);
 
     //TO DO : Bind Texture

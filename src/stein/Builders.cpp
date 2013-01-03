@@ -201,9 +201,9 @@ void buildSphere(Object &object, const float r,std::size_t discLat, std::size_t 
                             );
 
             builder.addNormal(
-                normalSens * sin(i * dPhi) * cosTheta,
-                normalSens * sinTheta,
-                 normalSens * cos(i * dPhi) * cosTheta);
+                sin(i * dPhi) * cosTheta,
+                sinTheta,
+                cos(i * dPhi) * cosTheta);
 
             builder.addUV(i * rcpLat, 1.f - j * rcpLong);
 

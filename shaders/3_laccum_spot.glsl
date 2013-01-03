@@ -17,8 +17,8 @@ out vec2 uv;
 void main(void)
 {
     uv = vertexUv.xy;
-    //vec4 vEyeSpacePosVertex = View * Object * vec4(vertexPosition,1.0);
-    //vEyeSpacePos = vEyeSpacePosVertex;
+	    //vec4 vEyeSpacePosVertex = View * Object * vec4(vertexPosition,1.0);
+	    //vEyeSpacePos = vEyeSpacePosVertex;
 	gl_Position = Projection * vec4(vertexPosition, 1.0);
 }
 
@@ -135,23 +135,16 @@ void main(void)
 
 	vec3 diffuse = material.rgb;
 	float spec = material.a;
+	Color = vec4(diffuse, 1.0);
 
 	vec3 n = normalize(normal);
 
+	vec3 lp = vec3(0.0,0.0,0.0);
+
 	vec3 cspotlight1 = spotLight(LightColor, LightIntensity, LightDirection, LightPosition, n, position, diffuse, spec, CameraPosition );
 
-	float fFogCoord = abs(vEye.z/vEye.w);
 
-    FogParameters fparams;
-    fparams.vFogColor = vec4(1.0f, 1.0f, 1.0f, 1.0f);
-    fparams.fStart = 20.0f;
-    fparams.fEnd = 100.0f;
-    fparams.fDensity = 0.01f;
-    fparams.iEquation = 2;
-
-
-	vec4 color_light;
-
+	/*
 	if (wlightSpacePosition.w > 0.0  && lightSpacePosition.x > 0.0 && lightSpacePosition.x < 1.0 && lightSpacePosition.y > 0.0 && lightSpacePosition.y < 1.0 )
 	{
 		
@@ -165,18 +158,15 @@ void main(void)
 			    visibility-=visibilityOffset;
 			}
 		}
-		color_light = vec4(cspotlight1 * visibility, 1.0);
+		Color = vec4(cspotlight1 * visibility, 1.0);
 
 	}
 	else
 	{
-		color_light = vec4(cspotlight1, 1.0);
-	} 
-	
-	//Color = mix(color_light,fparams.vFogColor, getFogFactor(fparams,fFogCoord));
-	Color = color_light;
+		Color = vec4(cspotlight1, 1.0);
+	}
 
-	/* 
+	
 	float shadowDepth = texture(Shadow, lightSpacePosition.xy).r;
 	Color = vec4(lightSpacePosition.z - shadowDepth , 0.0, 0.0, 1.0);
 
@@ -185,19 +175,19 @@ void main(void)
 		Color = vec4(0.0, 0.0, 0.0, 1.0);
 	else
 		Color = vec4(cspotlight1, 1.0);
-
-		*/
+*/
 	//Color = vec4(lightSpacePosition.z, 0.0, 0.0, 1.0);
 	//Color = vec4(lightSpacePosition.xy, -lightSpacePosition.z, 1.0);
 
 	//Color = vec4(shadowDepth , 0.0, 0.0, 1.0);
 
 
-	//Color = vec4(cspotlight1, 1.0);
+	Color = vec4(cspotlight1, 1.0);
 	//Color = vec4(texture(Shadow, uv).z, 0.0 , 0.0, 1.0);
 
 	//Color = vec4(shadowDepth, 0.0, 0.0, 1.0);
 	//Color = vec4(depth, 0.0 , 0.0, 1.0);
+	//Color = vec4(normal, 1.0);
 }
 
 #endif

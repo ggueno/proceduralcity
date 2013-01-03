@@ -152,7 +152,6 @@ void Scene::setAppearance(const ObjectInstance &instance, int timer) {
     setFilledDataInShader(shaderId, pObject->hasPrimitives(), pObject->hasNormals(), pObject->hasUvs(), pObject->hasColors());
 
     // Sets the light in the current shader
-    setLightInShader(shaderId, lightPosition, lightPower);
     setTimerInShader(shaderId, (GLfloat) timer);
 
     //TO DO : Bind Texture
@@ -217,7 +216,7 @@ void Scene::setAppearance(const ObjectInstance &instance, GLuint shaderId, bool 
 
 // Draw all Objects
 void Scene::drawObjectsOfScene(int timer) {
-    for (size_t i = 0; i < drawnObjects.size(); ++i) {
+    for (size_t i = 1; i < drawnObjects.size(); ++i) {
         if(drawnObjects[i].objectId !=-1){
             const ObjectInstance &instance = drawnObjects[i];
             setAppearance(instance,timer);
@@ -227,7 +226,7 @@ void Scene::drawObjectsOfScene(int timer) {
 }
 
 void Scene::drawObjectsOfScene(GLuint shaderId, bool texture, bool camera) {
-    for (size_t i = 0; i < drawnObjects.size(); ++i) {
+    for (size_t i = 1; i < drawnObjects.size(); ++i) {
         if(drawnObjects[i].objectId !=-1){
             const ObjectInstance &instance = drawnObjects[i];
             setAppearance(instance, shaderId, texture, camera);
